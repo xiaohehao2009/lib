@@ -11,27 +11,27 @@ namespace CatchTheBeans
         private const int BeginButtonTop = (Config.WindowHeight / 3) - 1;
         private const int DiffButtonTop = (Config.WindowHeight / 2) - 1;
         private const int EndButtonTop = (Config.WindowHeight * 2 / 3) - 1;
-        private const int TextLeft = (Config.WindowWidth / 2) - 2 - 1;
+        private const int TextLeft = (Config.WindowWidth / 2) - 4 - 1;
         private int selectedButton;
         public override void Start()
         {
             Utils.SetColor(false);
             Console.Clear();
-            this.PrintText();
+            PrintText();
         }
 
         private void PrintText()
         {
             Console.SetCursorPosition(TextLeft, BeginButtonTop);
-            Utils.SetColor(this.selectedButton == 0);
+            Utils.SetColor(selectedButton == 0);
             Console.Write("开始游戏");
 
             Console.SetCursorPosition(TextLeft, DiffButtonTop);
-            Utils.SetColor(this.selectedButton == 1);
+            Utils.SetColor(selectedButton == 1);
             Console.Write("选择难度");
 
             Console.SetCursorPosition(TextLeft, EndButtonTop);
-            Utils.SetColor(this.selectedButton == 2);
+            Utils.SetColor(selectedButton == 2);
             Console.Write("退出游戏");
         }
 
@@ -49,24 +49,24 @@ namespace CatchTheBeans
                 {
                     case 'w':
                     case 'W':
-                        if (this.selectedButton != 0)
+                        if (selectedButton != 0)
                         {
-                            this.selectedButton--;
+                            selectedButton--;
                             changed = true;
                         }
                         break;
                     case 's':
                     case 'S':
-                        if (this.selectedButton != 2)
+                        if (selectedButton != 2)
                         {
-                            this.selectedButton++;
+                            selectedButton++;
                             changed = true;
                         }
                         break;
                     case ' ':
-                    case '\n':
+                    case (char)ConsoleKey.Enter:
                         game.chars.Clear();
-                        game.ChangeScene(this.selectedButton switch
+                        game.ChangeScene(selectedButton switch
                         {
                             0 => new GameScene(),
                             1 => new SelectDiff(),
@@ -79,7 +79,7 @@ namespace CatchTheBeans
             game.chars.Clear();
             if (changed)
             {
-                this.PrintText();
+                PrintText();
             }
         }
     }

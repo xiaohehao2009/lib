@@ -15,7 +15,7 @@ namespace CatchTheBeans
         private static readonly string reseter = new string(' ', Config.PlayerWidth);
         public void Print()
         {
-            Console.SetCursorPosition(this.x, y);
+            Console.SetCursorPosition(x, y);
             Console.Write(str);
         }
         public bool Update(List<ConsoleKeyInfo> chars)
@@ -24,7 +24,7 @@ namespace CatchTheBeans
             {
                 return false;
             }
-            int lastX = this.x;
+            int lastX = x;
             bool changed = false;
             foreach (ConsoleKeyInfo info in chars)
             {
@@ -35,17 +35,17 @@ namespace CatchTheBeans
                     case 'A':
                         if (info.Modifiers != ConsoleModifiers.Shift)
                         {
-                            if (this.x != 0)
+                            if (x != 0)
                             {
-                                this.x--;
+                                x--;
                                 changed = true;
                             }
                         }
                         else
                         {
-                            if (this.x > 1)
+                            if (x > 1)
                             {
-                                this.x -= 2;
+                                x -= 2;
                                 changed = true;
                             }
                         }
@@ -54,17 +54,17 @@ namespace CatchTheBeans
                     case 'D':
                         if (info.Modifiers != ConsoleModifiers.Shift)
                         {
-                            if (this.x != maxX)
+                            if (x != maxX)
                             {
-                                this.x++;
+                                x++;
                                 changed = true;
                             }
                         }
                         else
                         {
-                            if (this.x < maxX - 1)
+                            if (x < maxX - 1)
                             {
-                                this.x += 2;
+                                x += 2;
                                 changed = true;
                             }
                         }
@@ -81,7 +81,7 @@ namespace CatchTheBeans
             {
                 Console.SetCursorPosition(lastX, y);
                 Console.Write(reseter);
-                this.Print();
+                Print();
             }
             return false;
         }

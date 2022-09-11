@@ -27,6 +27,5 @@ namespace CatchTheBeans
             mode &= ~ENABLE_INSERT_MODE;
             SetConsoleMode(hStdin, mode);
         }
-
     }
 }

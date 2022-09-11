@@ -10,31 +10,36 @@ namespace CatchTheBeans
     {
         private Scene scene = new BeginMenu();
         private readonly AutoResetEvent are = new AutoResetEvent(false);
-        private Timer? timer;
+        private readonly Timer timer;
         public List<ConsoleKeyInfo> chars = new List<ConsoleKeyInfo>(3);
+        public Game()
+        {
+            timer = new Timer(_ =>
+            {
+                while (Console.KeyAvailable)
+                {
+                    chars.Add(Console.ReadKey(true));
+                }
+                scene.Update(this);
+            }, null, Timeout.Infinite, 16);
+        }
+
         public void ChangeScene(Scene newScene)
         {
-            this.scene = newScene;
+            scene = newScene;
             newScene.Start();
         }
         public void Start()
         {
-            this.scene.Start();
-            this.timer = new(_ =>
-            {
-                while (Console.KeyAvailable)
-                {
-                    this.chars.Add(Console.ReadKey(true));
-                }
-                this.scene.Update(this);
-            }, null, 16, 16);
-            this.are.WaitOne();
-            this.timer.Dispose();
-            this.are.Dispose();
+            scene.Start();
+            timer.Change(16, 16);
+            are.WaitOne();
+            timer.Dispose();
+            are.Dispose();
         }
         public void End()
         {
-            this.are.Set();
+            are.Set();
         }
     }
 }

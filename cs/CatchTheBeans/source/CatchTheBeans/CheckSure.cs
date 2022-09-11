@@ -11,8 +11,8 @@ namespace CatchTheBeans
         private const int checkerTop = (Config.WindowHeight / 2) - 3 - 1;
         private const int checkerLeft = ((Config.WindowWidth - 20) / 2) - 1;
         private const int buttonsTop = (Config.WindowHeight / 2) + 3 - 1;
-        private const int cancelLeft = (Config.WindowWidth / 2) - 8 - 1;
-        private const int sureLeft = (Config.WindowWidth / 2) + 4 - 1;
+        private const int cancelLeft = (Config.WindowWidth / 2) - 4 - 2 - 1;
+        private const int sureLeft = (Config.WindowWidth / 2) + 4 - 2 - 1;
         private int selectedButton;
         public override void Start()
         {
@@ -20,16 +20,16 @@ namespace CatchTheBeans
             Console.Clear();
             Console.SetCursorPosition(checkerLeft, checkerTop);
             Console.Write("您确定要退出游戏吗？");
-            this.PrintButtons();
+            PrintButtons();
         }
 
         private void PrintButtons()
         {
             Console.SetCursorPosition(cancelLeft, buttonsTop);
-            Utils.SetColor(this.selectedButton == 0);
+            Utils.SetColor(selectedButton == 0);
             Console.Write("取消");
             Console.SetCursorPosition(sureLeft, buttonsTop);
-            Utils.SetColor(this.selectedButton == 1);
+            Utils.SetColor(selectedButton == 1);
             Console.Write("确定");
         }
         public override void Update(Game game)
@@ -46,18 +46,18 @@ namespace CatchTheBeans
                 {
                     case 'a':
                     case 'A':
-                        this.selectedButton = 0;
+                        selectedButton = 0;
                         changed = true;
                         break;
                     case 'd':
                     case 'D':
-                        this.selectedButton = 1;
+                        selectedButton = 1;
                         changed = true;
                         break;
                     case ' ':
-                    case '\n':
+                    case (char)ConsoleKey.Enter:
                         game.chars.Clear();
-                        if (this.selectedButton == 1)
+                        if (selectedButton == 1)
                         {
                             Utils.SetColor(false);
                             game.End();
@@ -72,7 +72,7 @@ namespace CatchTheBeans
             game.chars.Clear();
             if (changed)
             {
-                this.PrintButtons();
+                PrintButtons();
             }
         }
     }

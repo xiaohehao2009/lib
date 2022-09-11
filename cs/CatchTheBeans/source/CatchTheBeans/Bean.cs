@@ -9,35 +9,44 @@ namespace CatchTheBeans
     internal class Bean
     {
         private static readonly Random random = new Random();
-        public readonly int x;
+        public int x;
         public int y;
         private const int maxY = Config.WindowHeight - 3;
         private int count;
         private const int bound = Config.WindowWidth;
         public Bean()
         {
-            this.x = random.Next(bound);
+            Reset();
+        }
+
+        private void Reset()
+        {
+            x = random.Next(bound);
+            y = 0;
         }
 
         public void Print()
         {
-            Console.SetCursorPosition(this.x, this.y);
+            Console.SetCursorPosition(x, y);
             Console.Write(Config.BeanChar);
         }
         public void Update()
         {
-            if (this.y >= maxY)
+            count++;
+            if (count >= Config.BeanSpeed)
             {
-                return;
-            }
-            this.count++;
-            if (this.count >= Config.BeanSpeed)
-            {
-                Console.SetCursorPosition(this.x, this.y);
+                Console.SetCursorPosition(x, y);
                 Console.Write(' ');
-                this.count = 0;
-                this.y++;
-                this.Print();
+                count = 0;
+                y++;
+                if (y != maxY + 1)
+                {
+                    Print();
+                }
+            }
+            if (y == maxY + 1)
+            {
+                Reset();
             }
         }
     }

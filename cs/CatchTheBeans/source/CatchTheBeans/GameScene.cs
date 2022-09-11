@@ -21,40 +21,40 @@ namespace CatchTheBeans
             Console.SetCursorPosition(0, lineTop);
             Console.Write(new string(Config.LineChar, Config.WindowWidth));
             Utils.SetColor(false);
-            this.player.Print();
-            this.bean.Print();
-            this.PrintScore();
+            player.Print();
+            bean.Print();
+            PrintScore();
         }
 
         private void PrintScore()
         {
             Console.SetCursorPosition(0, scoreTop);
             Console.Write(scoreReseter);
-            Console.CursorLeft = 0;
-            Console.Write($"得分: {this.score}");
+            Console.SetCursorPosition(0, scoreTop);
+            Console.Write($"得分: {score}");
         }
         public override void Update(Game game)
         {
-            if (this.player.Update(game.chars))
+            if (player.Update(game.chars))
             {
                 game.ChangeScene(new BeginMenu());
                 return;
             }
-            this.bean.Update();
-            if (this.bean.y == Player.y)
+            bean.Update();
+            if (bean.y == Player.y)
             {
-                if (this.bean.x < this.player.x + Config.PlayerWidth && this.bean.x >= this.player.x)
+                if (bean.x < player.x + Config.PlayerWidth && bean.x >= player.x)
                 {
-                    this.score += Config.ScoreWin;
+                    score += Config.ScoreWin;
                 }
                 else
                 {
-                    this.score -= Config.ScoreLose;
-                    Console.SetCursorPosition(this.bean.x, this.bean.y);
+                    score -= Config.ScoreLose;
+                    Console.SetCursorPosition(bean.x, bean.y);
                     Console.Write(' ');
                 }
-                this.PrintScore();
-                this.bean = new Bean();
+                PrintScore();
+                bean = new Bean();
             }
         }
     }
