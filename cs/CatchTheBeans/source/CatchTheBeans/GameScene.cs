@@ -30,8 +30,7 @@ namespace CatchTheBeans
         {
             Console.SetCursorPosition(0, scoreTop);
             Console.Write(scoreReseter);
-            Console.SetCursorPosition(0, scoreTop);
-            Console.Write($"得分: {score}");
+            Console.Write($"\r得分: {score}");
         }
         public override void Update(Game game)
         {
@@ -41,16 +40,16 @@ namespace CatchTheBeans
                 return;
             }
             bean.Update();
-            if (bean.y == Player.y)
+            if (bean.Y == Player.y)
             {
-                if (bean.x < player.x + Config.PlayerWidth && bean.x >= player.x)
+                if (bean.X < player.X + Config.PlayerWidth && bean.X >= player.X)
                 {
                     score += Config.ScoreWin;
                 }
                 else
                 {
                     score -= Config.ScoreLose;
-                    Console.SetCursorPosition(bean.x, bean.y);
+                    Console.SetCursorPosition(bean.X, bean.Y);
                     Console.Write(' ');
                 }
                 PrintScore();

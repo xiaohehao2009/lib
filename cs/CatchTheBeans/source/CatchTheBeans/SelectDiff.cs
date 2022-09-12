@@ -45,27 +45,34 @@ namespace CatchTheBeans
             bool changed = false;
             foreach (ConsoleKeyInfo info in game.chars)
             {
-                char ch = info.KeyChar;
-                switch (ch)
+                switch (info.Key)
                 {
-                    case 'a':
-                    case 'A':
+                    case ConsoleKey.A:
+                    case ConsoleKey.LeftArrow:
+                        changed = true;
                         if (selectedButton != 0)
                         {
                             selectedButton--;
-                            changed = true;
+                        }
+                        else
+                        {
+                            selectedButton = 2;
                         }
                         break;
-                    case 'd':
-                    case 'D':
+                    case ConsoleKey.D:
+                    case ConsoleKey.RightArrow:
+                        changed = true;
                         if (selectedButton != 2)
                         {
                             selectedButton++;
-                            changed = true;
+                        }
+                        else
+                        {
+                            selectedButton = 0;
                         }
                         break;
-                    case ' ':
-                    case (char)ConsoleKey.Enter:
+                    case ConsoleKey.Spacebar:
+                    case ConsoleKey.Enter:
                         Config.SelectedSpeed = selectedButton;
                         Config.BeanSpeed = Config.BeanSpeeds[selectedButton];
                         game.chars.Clear();

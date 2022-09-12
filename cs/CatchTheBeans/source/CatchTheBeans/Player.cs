@@ -10,12 +10,12 @@ namespace CatchTheBeans
     {
         private const int maxX = Config.WindowWidth - Config.PlayerWidth;
         public const int y = Config.WindowHeight - 3;
-        public int x;
+        public int X { get; private set; }
         private static readonly string str = new string(Config.PlayerChar, Config.PlayerWidth);
         private static readonly string reseter = new string(' ', Config.PlayerWidth);
         public void Print()
         {
-            Console.SetCursorPosition(x, y);
+            Console.SetCursorPosition(X, y);
             Console.Write(str);
         }
         public bool Update(List<ConsoleKeyInfo> chars)
@@ -24,54 +24,52 @@ namespace CatchTheBeans
             {
                 return false;
             }
-            int lastX = x;
+            int lastX = X;
             bool changed = false;
             foreach (ConsoleKeyInfo info in chars)
             {
-                char ch = info.KeyChar;
-                switch (ch)
+                switch (info.Key)
                 {
-                    case 'a':
-                    case 'A':
+                    case ConsoleKey.A:
+                    case ConsoleKey.LeftArrow:
                         if (info.Modifiers != ConsoleModifiers.Shift)
                         {
-                            if (x != 0)
+                            if (X != 0)
                             {
-                                x--;
+                                X--;
                                 changed = true;
                             }
                         }
                         else
                         {
-                            if (x > 1)
+                            if (X > 1)
                             {
-                                x -= 2;
+                                X -= 2;
                                 changed = true;
                             }
                         }
                         break;
-                    case 'd':
-                    case 'D':
+                    case ConsoleKey.D:
+                    case ConsoleKey.RightArrow:
                         if (info.Modifiers != ConsoleModifiers.Shift)
                         {
-                            if (x != maxX)
+                            if (X != maxX)
                             {
-                                x++;
+                                X++;
                                 changed = true;
                             }
                         }
                         else
                         {
-                            if (x < maxX - 1)
+                            if (X < maxX - 1)
                             {
-                                x += 2;
+                                X += 2;
                                 changed = true;
                             }
                         }
                         break;
-                    case (char)ConsoleKey.Escape:
-                    case 'r':
-                    case 'R':
+                    case ConsoleKey.R:
+                    case ConsoleKey.Escape:
                         chars.Clear();
                         return true;
                 }

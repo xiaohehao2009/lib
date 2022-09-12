@@ -8,8 +8,8 @@ namespace CatchTheBeans
 {
     internal class Config
     {
-        public const int WindowWidth = 60;
-        public const int WindowHeight = 30;
+        public const int WindowWidth = 80;
+        public const int WindowHeight = 42;
         public static readonly int[] BeanSpeeds =
         {
             14, 10, 6

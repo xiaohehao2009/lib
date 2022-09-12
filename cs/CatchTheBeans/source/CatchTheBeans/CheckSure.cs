@@ -41,21 +41,17 @@ namespace CatchTheBeans
             bool changed = false;
             foreach (ConsoleKeyInfo info in game.chars)
             {
-                char ch = info.KeyChar;
-                switch (ch)
+                switch (info.Key)
                 {
-                    case 'a':
-                    case 'A':
-                        selectedButton = 0;
+                    case ConsoleKey.A:
+                    case ConsoleKey.D:
+                    case ConsoleKey.LeftArrow:
+                    case ConsoleKey.RightArrow:
+                        selectedButton = 1 - selectedButton;
                         changed = true;
                         break;
-                    case 'd':
-                    case 'D':
-                        selectedButton = 1;
-                        changed = true;
-                        break;
-                    case ' ':
-                    case (char)ConsoleKey.Enter:
+                    case ConsoleKey.Spacebar:
+                    case ConsoleKey.Enter:
                         game.chars.Clear();
                         if (selectedButton == 1)
                         {
