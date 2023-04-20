@@ -1,4 +1,3 @@
-from datetime import datetime
 from threading import Thread, Timer, Lock
 from time import time, strftime, sleep
 import curses
@@ -8,25 +7,36 @@ lock = Lock()
 class Scene:
     name = ''
     key = []
-    def on_enter(self): pass
-    def on_press(self, press_key): pass
-    def on_exit(self): pass
+
+    def on_enter(self):
+        pass
+
+    def on_press(self, press_key):
+        pass
+
+    def on_exit(self):
+        pass
+
+    def on_mouse(self, mouse):
+        pass
 
 class TimeScene(Scene):
     name = '时钟'
     key = [ord('q'), ord('Q')]
     active = True
+
     def output(self):
         msg = strftime("%a %b %d %Y %H:%M:%S")
-        x = (width - len(msg)) // 2
+        x = (width - len(msg)) // 2 - 1
         scr.erase()
         scr.addstr(center_y, x, msg)
         scr.refresh()
+
     def on_enter(self):
         self.output()
         current_time = time()
-        current_timer = Timer(int(current_time) + 1 - current_time, self.timer)
-        current_timer.start()
+        Timer(int(current_time) + 1 - current_time, self.timer).start()
+
     def timer(self):
         while self.active:
             lock.acquire()
@@ -34,10 +44,10 @@ class TimeScene(Scene):
             lock.release()
             current_time = time()
             sleep(int(current_time) + 1 - current_time)
-    def on_press(self, press_key): pass
+
     def on_exit(self):
-        self.active = False
         lock.acquire()
+        self.active = False
         lock.release()
 
 class StopWatchScene(Scene):
@@ -48,31 +58,42 @@ class StopWatchScene(Scene):
     active = False
     start_time = 0
     extend_time = 0
+
     @staticmethod
     def delta_to_str(delta):
-        result = f'{int(delta % 3600) // 60:0>2d}:{int(delta % 60):0>2d}.{int(delta % 1 * 100):0<2d}'
-        return f'{hours:0>2d}:{result}' if (hours := int(delta) // 3600) else result
+        result = f'{int(delta % 3600) // 60:0>2d}:\
+{int(delta % 60):0>2d}.{int(delta % 1 * 100):0<2d}'
+        return f'{hours:0>2d}:{result}' \
+            if (hours := int(delta) // 3600) else result
+
     def delta(self, delta):
         msg = self.delta_to_str(delta)
         if num := len(self.stages):
-            self.win.addstr(0, (width - len(msg)) // 2, msg)
+            scr.addstr(0, (width - len(msg)) // 2 - 1, msg)
             for i in range(num):
                 y = num - i
-                self.win.addstr(y, 0, f'{i + 1:0>2d}')
-                t = self.stages[i] - self.stages[i - 1] if i else self.stages[i]
+                scr.addstr(y, 0, f'{i + 1:0>2d}')
+                t = ((self.stages[i] - self.stages[i - 1])
+                    if i else self.stages[i])
                 time = self.delta_to_str(t)
-                self.win.addstr(y, (width - len(time) - 1) // 2, '+ ' + time)
+                scr.addstr(y, (width - len(time) - 1) // 2, '+ ' + time)
                 if i: time = self.delta_to_str(self.stages[i])
-                self.win.addstr(y, width - len(time) - 1, time)
+                scr.addstr(y, width - len(time) - 1, time)
         else:
-            self.win.addstr(center_y - 1, (width - len(msg)) // 2, msg)
+            scr.addstr(center_y - 1, (width - len(msg)) // 2 - 1, msg)
+
     def state(self):
-        if self.active: msg = '%    Ⅱ'
-        elif self.extend_time != 0: msg = '■    ▶'
-        else: msg = '▶'
-        self.win.addstr(center_y, (width - len(msg)) // 2, msg)
+        if self.active:
+            scr.addstr(self.state_y, self.left_x, '+')
+            scr.addstr(self.state_y, self.right_x, 'Ⅱ')
+        elif self.extend_time != 0:
+            scr.addstr(self.state_y, self.left_x, '■')
+            scr.addstr(self.state_y, self.right_x, '▶')
+        else:
+            scr.addstr(self.state_y, center_x - 1, '▶')
+
     def output(self):
-        self.win.erase()
+        scr.erase()
         self.state()
         if self.active:
             delta = time() - self.start_time
@@ -80,17 +101,15 @@ class StopWatchScene(Scene):
         else:
             self.refreshed = True
             self.delta(self.extend_time)
-        self.win.refresh()
-    @staticmethod
-    def keys_to_cmd(keys, to):
-        return f'Press {", ".join([f"<{chr(i)}>" for i in keys[:-1]])} or <{chr(keys[-1])}> to {to}'
+        scr.refresh()
+
     def on_enter(self):
         self.stages = []
-        self.win = scr.subwin(height - 3, width, 1, 0)
-        scr.addstr(height - 3, 0, self.keys_to_cmd(self.pause_key, 'start or pause'))
-        scr.addstr(height - 2, 0, self.keys_to_cmd(self.stage_key, 'add stages or close'))
-        scr.refresh()
+        self.state_y = center_y + 1
+        self.left_x = center_x - 4
+        self.right_x = center_x + 2
         self.output()
+
     def on_press(self, press_key):
         if press_key in self.stage_key:
             if not self.active and self.extend_time != 0:
@@ -101,7 +120,8 @@ class StopWatchScene(Scene):
                 return
             if self.active:
                 lock.acquire()
-                self.stages.append(time() - self.start_time + self.extend_time)
+                self.stages.append(
+                    time() - self.start_time + self.extend_time)
                 lock.release()
         elif press_key in self.pause_key:
             self.refreshed = False
@@ -118,35 +138,47 @@ class StopWatchScene(Scene):
                 self.output()
                 thread = Thread(target=self.thread)
                 thread.start()
-        elif press_key == curses.KEY_MOUSE:
-            try:
-                _, x, y, _, n = curses.getmouse()
-                if abs(y - center_y) <= 3:
-                    if self.active or self.extend_time != 0:
-                        if abs(x - (width - 6) // 2 + 1) <= 3:
-                            self.on_press(self.stage_key[0])
-                        elif abs(x - (width - 6) // 2 - 6) <= 3:
-                            self.on_press(self.pause_key[0])
-                    else:
-                        if abs(x - center_x) <= 5:
-                            self.on_press(self.pause_key[0])
-            except: pass
+
+    def on_mouse(self, mouse):
+        _, x, y, _, n = mouse
+        if abs(y - self.state_y - 1) <= 3:
+            if self.active or self.extend_time != 0:
+                if abs(x - self.left_x + 1) <= 4:
+                    self.on_press(self.stage_key[0])
+                elif abs(x - self.right_x - 1) <= 4:
+                    self.on_press(self.pause_key[0])
+            else:
+                if abs(x - center_x) <= 6:
+                    self.on_press(self.pause_key[0])
+
     def thread(self):
         while self.active:
             lock.acquire()
             self.output()
             lock.release()
             curses.napms(17)
+
     def on_exit(self):
         lock.acquire()
         self.active = False
         lock.release()
 
-def top(stdscr, types, id):
+def top(stdscr, types, pos, id):
     num = len(types)
     for i in range(num):
-        stdscr.addstr(0, int((width // num) * (i + 0.5)), types[i].name, curses.A_REVERSE if i != id else curses.A_NORMAL)
+        stdscr.addstr(0, pos[i], types[i].name,
+            curses.A_REVERSE if i != id else curses.A_NORMAL)
     stdscr.refresh()
+
+def switch(scene, stdscr, types, pos, i):
+    if type(scene) == types[i]: return scene
+    scene.on_exit()
+    top(stdscr, types, pos, i)
+    scr.erase()
+    scr.refresh()
+    new = types[i]()
+    new.on_enter()
+    return new
 
 def main(stdscr):
     global scr, width, height, center_x, center_y
@@ -163,13 +195,14 @@ def main(stdscr):
     stdscr.bkgd(' ', curses.color_pair(1))
 
     curses.curs_set(False)
-    stdscr.timeout(17)
+    stdscr.timeout(50)
     curses.mouseinterval(50)
-    curses.mousemask(1)
+    curses.mousemask(curses.BUTTON1_PRESSED)
     types = [TimeScene, StopWatchScene]
     num = len(types)
+    pos = [(int(width // num * (i + 0.5)) - 1) for i in range(num)]
     stdscr.addstr(0, 0, ' ' * width, curses.A_REVERSE)
-    top(stdscr, types, 0)
+    top(stdscr, types, pos, 0)
 
     scene = types[0]()
     scene.on_enter()
@@ -178,19 +211,33 @@ def main(stdscr):
         if ch in exit_key:
             scene.on_exit()
             return
-        if ch != -1:
-            flag = True
-            for i in range(num):
-                if ch in types[i].key:
-                    if type(scene) == types[i]: break
-                    scene.on_exit()
-                    top(stdscr, types, i)
-                    scr.erase()
-                    scr.refresh()
-                    scene = types[i]()
-                    scene.on_enter()
-                    flag = False
-                    break
-            if flag: scene.on_press(ch)
+        if ch != curses.ERR:
+            if ch == curses.KEY_MOUSE:
+                flag = True
+                mouse = None
+                try:
+                    mouse = curses.getmouse()
+                    _, x, y, _, _ = mouse
+                    if y <= 2:
+                        for i in range(num):
+                            if abs(x - pos[i]) <= 3:
+                                scene = switch(scene, stdscr, types, pos, i)
+                                flag = False
+                                break
+                    if flag:
+                        scene.on_mouse(mouse)
+                except:
+                    if mouse != None:
+                        scene.on_mouse(mouse)
+            else:
+                flag = True
+                for i in range(num):
+                    if ch in types[i].key:
+                        scene = switch(scene, stdscr, types, pos, i)
+                        flag = False
+                        break
+                if flag:
+                    scene.on_press(ch)
 
-curses.wrapper(main)
+if __name__ == '__main__':
+    curses.wrapper(main)
