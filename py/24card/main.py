@@ -1,7 +1,6 @@
 import operator
 from fractions import Fraction
 from numbers import Number
-from copy import deepcopy
 from time import time
 from itertools import product, permutations
 
