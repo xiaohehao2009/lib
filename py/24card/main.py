@@ -93,7 +93,7 @@ def calc_24card(nums: tuple, size: int, symbols: dict,
 
 
 def fraction_wrap(fraction: Fraction):
-    return (str(fraction) if fraction.denominator == 1
+    return (str(fraction) if (fraction.denominator == 1 and fraction >= 0)
         else f'({fraction})')
 
 
