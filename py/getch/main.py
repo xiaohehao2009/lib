@@ -34,6 +34,7 @@ def putchar(ch):
         put a character into the stdout
     '''
     sys.stdout.buffer.write(str.encode(ch))
+    sys.stdout.flush()
     return ch
 
 def getchar():
@@ -88,19 +89,23 @@ def wrapper(func, *args, **argv):
 
 if __name__ == '__main__':
     def main():
-        from time import sleep
-        stop_flag = 'r'
-        cont_flag = 'r'
-        print(f'press {stop_flag} to break the loop, others to echo')
+        stop_flag = '\x18' # Ctrl + X
+        debug = False
         while True:
-            if kbhit():
-                ch = getch_()
-                if ch == stop_flag:
-                    print(f'press anykey to exit or {cont_flag} to continue')
-                    ch_ = getch()
-                    if ch_ != cont_flag:
-                        break
-                    continue
-                print(f'you pressed {ch}, ord: {ord(ch)}')
-            sleep(0.06)
+            ch = getch()
+            if ch == stop_flag:
+                if not debug:
+                    putchar('\n')
+                break
+            if ch == '\x11': # Ctrl + Q
+                debug = not debug
+                print(f'\ndebug mode {"en" if debug else "dis"}abled')
+                continue
+            if ch == '\x08' or ch == '\x7f':
+                print('\x1b[D\x1b[P', end='')
+                sys.stdout.flush()
+            elif debug:
+                print(ch, hex(ord(ch)))
+            else:
+                putchar(ch)
     wrapper(main)
