@@ -1,0 +1,31 @@
+: a b c d
+0 a A l a
+0 b B l b
+0 c C l c
+0 d D l d
+0 _ $ l r
+0 * $ r 0
+
+a * $ l a
+a _ a r m
+
+b * $ l b
+b _ b r m
+
+c * $ l c
+c _ c r m
+
+d * $ l d
+d _ d r m
+
+m * $ r m
+m A $ r 0
+m B $ r 0
+m C $ r 0
+m D $ r 0
+
+r A a l r
+r B b l r
+r C c l r
+r D d l r
+r * $ s stop

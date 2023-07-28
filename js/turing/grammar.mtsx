@@ -1,0 +1,33 @@
+{
+    name: ["TURING", ".tur", ".turing"]
+    comment: {
+        startsWith: ";#"
+        endsWith: "###"
+    }
+    comment: { startsWith: ";" }
+    contains: [
+        {
+            match: /(?m)^(?:'use +.+?')|(?:"use +.+?")/
+            0: "meta"
+        }
+        {
+            match: /(?m)(?<=[\s\(\)\[\]\{\}:;@'"])/ +
+            /(?:\*|\$|stop|_|maxStep|(?:replace(?:Empty|Stop|Initail)))$/
+            0: "keyword2"
+        }
+        {
+            match: /(?<=[\s\(\)\[\]\{\}:;@'"])/ +
+            /(?:\*|\$|stop|_|maxStep|(?:replace(?:Empty|Stop|Initail)))/ +
+            /(?=[\s\(\)\[\]\{\}:;@'"])/
+            0: "keyword2"
+        }
+        {
+            match: /[^\s\(\)\[\]\{\}:;@'"]+/
+            0: "keyword"
+        }
+        {
+            match: /[\[\]\{\}:@]/
+            0: "operator"
+        }
+    ]
+}

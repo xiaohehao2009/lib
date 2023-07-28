@@ -1,0 +1,115 @@
+: a b c d e e d c b
+
+0 [a b c d e] [A B C D E] l [a b c d e]
+0 * $ r 0
+0 _ $ l r
+
+[a b c d e] * $ l $
+[a b c d e] _ [a b c d e] r mvr
+
+mvr [A B C D E] $ r 0
+mvr * $ r mvr
+
+r [A B C D E] [a b c d e] l r
+r * $ s stop
+
+; ; 0: (initail)
+; 0 a A l a
+; 0 b B l b
+; 0 c C l c
+; 0 d D l d
+; 0 e E l e
+
+; 0 A A R 0
+; 0 B B R 0
+; 0 C C R 0
+; 0 D D R 0
+; 0 E E R 0
+; 0 _ _ l r
+
+; ; a:
+;     a a a l a
+;     a b b l a
+;     a c c l a
+;     a d d l a
+;     a e e l a
+;     a A A l a
+;     a B B l a
+;     a C C l a
+;     a D D l a
+;     a E E l a
+;     a _ a r mvr
+
+; ; b:
+;     b a a l b
+;     b b b l b
+;     b c c l b
+;     b d d l b
+;     b e e l b
+;     b A A l b
+;     b B B l b
+;     b C C l b
+;     b D D l b
+;     b E E l b
+;     b _ b r mvr
+
+; ; c:
+;     c a a l c
+;     c b b l c
+;     c c c l c
+;     c d d l c
+;     c e e l c
+;     c A A l c
+;     c B B l c
+;     c C C l c
+;     c D D l c
+;     c E E l c
+;     c _ c r mvr
+
+; ; d:
+;     d a a l d
+;     d b b l d
+;     d c c l d
+;     d d d l d
+;     d e e l d
+;     d A A l d
+;     d B B l d
+;     d C C l d
+;     d D D l d
+;     d E E l d
+;     d _ d r mvr
+
+; ; e:
+;     e a a l e
+;     e b b l e
+;     e c c l e
+;     e d d l e
+;     e e e l e
+;     e A A l e
+;     e B B l e
+;     e C C l e
+;     e D D l e
+;     e E E l e
+;     e _ e r mvr
+
+; mvr a a r mvr
+; mvr b b r mvr
+; mvr c c r mvr
+; mvr d d r mvr
+; mvr e e r mvr
+; mvr A A r 0
+; mvr B B r 0
+; mvr C C r 0
+; mvr D D r 0
+; mvr E E r 0
+
+; r A a l r
+; r B b l r
+; r C c l r
+; r D d l r
+; r E e l r
+; r a a s stop
+; r b b s stop
+; r c c s stop
+; r d d s stop
+; r e e s stop

@@ -1,0 +1,44 @@
+:@replaceInitail m
+:@replaceEmpty empty
+:@replaceStop halt
+
+: <
+; number a
+: 2 1 4 7 4 8 3 6 4 7
+: +
+; number b
+: 6 5 5 3 6
+: >
+
+m > > r s
+{s s1} [9 8 7 6 5 4 3 2 1] [8 7 6 5 4 3 2 1 0] r mv
+{s s1} 0 9 r s1
+mv * $ r mv
+mv + $ r a
+s1 + > l r
+{a a1} [0 1 2 3 4 5 6 7 8] [1 2 3 4 5 6 7 8 9] l m
+{a a1} 9 0 r a1
+m * $ l m
+r * empty l r
+r > empty s halt
+
+
+; m > > r s
+; s 9 8 r mv s 8 7 r mv s 7 6 r mv s 6 5 r mv s 5 4 r mv
+; s 4 3 r mv s 3 2 r mv s 2 1 r mv s 1 0 r mv s 0 9 r s1
+; mv 9 9 r mv mv 8 8 r mv mv 7 7 r mv mv 6 6 r mv mv 5 5 r mv
+; mv 4 4 r mv mv 3 3 r mv mv 2 2 r mv mv 1 1 r mv mv 0 0 r mv
+; mv + + r a
+; s1 + > l rm
+; s1 9 8 r mv s1 8 7 r mv s1 7 6 r mv s1 6 5 r mv s1 5 4 r mv
+; s1 4 3 r mv s1 3 2 r mv s1 2 1 r mv s1 1 0 r mv s1 0 9 r s1
+; a 0 1 l m a 1 2 l m a 2 3 l m a 3 4 l m a 4 5 l m
+; a 5 6 l m a 6 7 l m a 7 8 l m a 8 9 l m a 9 0 r a1
+; m 0 0 l m m 1 1 l m m 2 2 l m m 3 3 l m m 4 4 l m
+; m 5 5 l m m 6 6 l m m 7 7 l m m 8 8 l m m 9 9 l m
+; m + + l m
+; a1 0 1 l m a1 1 2 l m a1 2 3 l m a1 3 4 l m a1 4 5 l m
+; a1 5 6 l m a1 6 7 l m a1 7 8 l m a1 8 9 l m a1 9 0 r a1
+; rm 0 _ l rm rm 1 _ l rm rm 2 _ l rm rm 3 _ l rm rm 4 _ l rm
+; rm 5 _ l rm rm 6 _ l rm rm 7 _ l rm rm 8 _ l rm rm 9 _ l rm
+; rm > _ s stop
