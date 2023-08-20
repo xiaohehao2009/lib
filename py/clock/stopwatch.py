@@ -83,9 +83,12 @@ class StopWatch(Screen):
         self.scr.addstr(y, x, msg)
         self.scr.refresh()
 
+    def get_tick_list_max_length(self):
+        return min(self.maxy // 3 * 2, 99)
+
     def draw_tick_list(self):
-        length = len(self.ticks)
-        if not length:
+        length = min(len(self.ticks), self.get_tick_list_max_length())
+        if length == 0:
             return
         for i in range(length):
             if length >= 10:
@@ -108,7 +111,7 @@ class StopWatch(Screen):
             self.scr.addstr(y, endx, total_time, curses.A_STANDOUT)
 
     def get_time_y(self):
-        length = len(self.ticks)
+        length = min(len(self.ticks), self.get_tick_list_max_length())
         y = self.maxy // 2 - 1
         if length >= y:
             y = length + 1
@@ -167,7 +170,7 @@ class StopWatch(Screen):
                 return
             # do tick
             num = len(self.ticks)
-            if num >= 99 or num >= self.maxy * 2 // 3:
+            if num > self.get_tick_list_max_length():
                 return
             self.lock.acquire()
             self.ticks.append(self.cached_time + (time() - self.last_time))
