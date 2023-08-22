@@ -65,6 +65,7 @@ class TimeClock(Screen):
 
     end = False
     pad = None
+    thread = None
 
     def __init__(self, scr):
         # if TimeClock.styles is None:
@@ -232,12 +233,13 @@ class TimeClock(Screen):
     def on_load(self):
         self.draw_time()
         self.draw_clock()
-        Thread(target=self.target).start()
+        self.thread = Thread(target=self.target)
+        self.thread.start()
 
     def target(self):
         while not self.end:
-            for i in range(6):
-                sleep(0.16)
+            for i in range(8):
+                sleep(0.1)
                 if self.end:
                     return
             self.lock.acquire()
@@ -251,6 +253,9 @@ class TimeClock(Screen):
         self.scr.erase()
         self.scr.refresh()
         self.lock.release()
+        if self.thread is not None:
+            self.thread.join()
+            self.thread = None
 
     def on_resize(self):
         self.lock.acquire()
@@ -261,3 +266,5 @@ class TimeClock(Screen):
         self.draw_clock()
         self.draw_time()
         self.lock.release()
+
+export = TimeClock

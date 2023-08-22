@@ -3,14 +3,11 @@
 import curses
 import curses.ascii
 
-from topline import TopLine
-from timeclock import TimeClock
-from stopwatch import StopWatch
+
+from data_read import get_datas
 
 
-TOP_LINE_HEIGHT = 1
-TOP_LINE_MOUSE_AREA_HEIGHT = 2
-PROGRAM_EXIT_KEY_SET = { curses.ascii.ESC, ord('c'), ord('C') }
+program_exit_keys = { curses.ascii.ESC, ord('c'), ord('C') }
 
 
 def check_states(states, max_allowed):
@@ -45,11 +42,18 @@ def main(stdscr):
     curses.mousemask(curses.ALL_MOUSE_EVENTS | curses.REPORT_MOUSE_POSITION)
     curses.use_default_colors()
     maxy, maxx = stdscr.getmaxyx()
-    top_line_scr = stdscr.derwin(TOP_LINE_HEIGHT, maxx, 0, 0)
-    app_body_scr = stdscr.derwin(maxy - TOP_LINE_HEIGHT, maxx, 1, 0)
+
+    TopLine, states, topline_mouse_area = get_datas()
+    topline_height = TopLine.topline_height
+
+    top_line_scr = stdscr.derwin(topline_height, maxx, 0, 0)
+    app_body_scr = stdscr.derwin(maxy - topline_height, maxx, 1, 0)
 
     curr = 0
-    states = [TimeClock, StopWatch]
+    if len(states) == 0:
+        while stdscr.getch() not in program_exit_keys:
+            pass
+        return
 
     chars_list = [
         'qQ', 'wW', 'eE', 'rR', 'tT', 'yY', 'uU', 'iI', 'oO', 'pP',
@@ -94,31 +98,31 @@ pairs: {len(pairs)}, but this program only supports \
         key = stdscr.getch()
         if key == curses.KEY_RESIZE:
             maxy, maxx = stdscr.getmaxyx()
-            top_line_scr.resize(TOP_LINE_HEIGHT, maxx)
-            app_body_scr.resize(maxy - TOP_LINE_HEIGHT, maxx)
+            top_line_scr.resize(topline_height, maxx)
+            app_body_scr.resize(maxy - topline_height, maxx)
             top_line.on_resize()
             app_body.on_resize()
             continue
         if key == curses.KEY_MOUSE:
             try:
                 _, x, y, _, bstate = curses.getmouse()
-                if not bstate & curses.BUTTON1_CLICKED:
-                    continue
-                if y < TOP_LINE_MOUSE_AREA_HEIGHT:
-                    new_pos = top_line.get_click_pos(x)
-                    if new_pos == curr:
-                        continue
-                    curr = new_pos
-                    top_line.draw(curr)
-                    app_body.on_unload()
-                    init_pairs(states[curr])
-                    app_body = states[curr](app_body_scr)
-                    app_body.on_load()
-                    continue
-                app_body.on_mouse(y, x)
             except curses.error:
-                pass
-        if key in PROGRAM_EXIT_KEY_SET:
+                continue
+            if not bstate & curses.BUTTON1_CLICKED:
+                continue
+            if y < topline_mouse_area:
+                new_pos = top_line.get_click_pos(x)
+                if new_pos == curr:
+                    continue
+                curr = new_pos
+                top_line.draw(curr)
+                app_body.on_unload()
+                init_pairs(states[curr])
+                app_body = states[curr](app_body_scr)
+                app_body.on_load()
+                continue
+            app_body.on_mouse(y, x)
+        if key in program_exit_keys:
             app_body.on_unload()
             return
         if key in switch_dict:

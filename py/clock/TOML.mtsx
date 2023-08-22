@@ -1,0 +1,23 @@
+{
+    name: ["TOML", ".toml"]
+    comment: {startsWith: "#"}
+    contains: [
+        {builtin: #NORMAL_NUMBER#}
+        {match: /[a-zA-Z$_]\w*/, 0: "keyword"}
+        {match: keywordsToRegex("true false inf")}
+        {start: { match:/"""/, 0: "string" },
+         end: { match:/(?<!\\|(?<!\\)""?"?)"""/, 0: "string" },
+         contains: [{ match: /\\./, 0: "strEscape" }],
+         color: "string"}
+        {start: { match:/"/, 0: "string" },
+         end: { match:/(?<!\\)"/, 0: "string" },
+         contains: [{ match: /\\./, 0: "strEscape" }],
+         color: "string"}
+        {start: { match:/'''/, 0: "string" },
+         end: { match:/(?<!''?'?)'''/, 0: "string" },
+         color: "string"}
+        {start: { match:/'/, 0: "string" },
+         end: { match:/'/, 0: "string" },
+         color: "string"}
+    ]
+}

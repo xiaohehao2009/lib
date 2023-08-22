@@ -6,7 +6,6 @@ from threading import Lock, Thread
 
 class StopWatch(Screen):
     name = '秒表'
-    registered_keys = [ord('f'), ord('F'), ord('h'), ord('H')]
     used_pairs = (
         (curses.COLOR_YELLOW, -1),
     )
@@ -25,6 +24,8 @@ class StopWatch(Screen):
     end_flag = False
     # to set the component to end
     end = False
+    # the thread
+    thread = None
 
     def __init__(self, scr):
         Screen.__init__(self, scr)
@@ -47,14 +48,14 @@ class StopWatch(Screen):
     def get_midx(self, length=1):
         return (self.maxx - length) // 2
     def get_leftx(self):
-        return (self.maxx - 1) // 2 - 3
+        return (self.maxx - 1) // 2 - 2
     def get_rightx(self):
         return (self.maxx - 1) // 2 + 2
 
     def draw_btns(self, y):
         # to draw buttons
         if self.state == 1:
-            self.scr.addstr(y, self.get_leftx(), '||')
+            self.scr.addstr(y, self.get_leftx(), 'Ⅱ')
             self.scr.addstr(y, self.get_rightx(), '●︎')
             return
         if self.state == 0:
@@ -63,14 +64,11 @@ class StopWatch(Screen):
         self.scr.addstr(y, self.get_leftx(), '▶')
         self.scr.addstr(y, self.get_rightx(), '■︎')
 
-    def get_btn_pos(self):
-        return (self.maxx - (5 if self.state else 2)) // 2
-
     def get_curr_time(self):
         if self.state == 1:
             return time() - self.last_time + self.cached_time
         if self.state == 0:
-            return 0.0
+            return 0.
         return self.cached_time
 
     def draw(self):
@@ -98,7 +96,7 @@ class StopWatch(Screen):
             y = length - i - 1
             total_tick = self.ticks[i]
             total_time = self.format(total_tick)
-            if i:
+            if i != 0:
                 append_tick = total_tick - self.ticks[i - 1]
                 append_time = f'+{self.format(append_tick)}'
             else:
@@ -128,6 +126,9 @@ class StopWatch(Screen):
             self.scr.refresh()
             self.end = True
             self.lock.release()
+            if self.thread is not None:
+                self.thread.join()
+                self.thread = None
             return
         self.scr.erase()
         self.scr.refresh()
@@ -158,7 +159,8 @@ class StopWatch(Screen):
                 return
             # do start
             self.state = 1
-            Thread(target=self.target).start()
+            self.thread = Thread(target=self.target)
+            self.thread.start()
             return
         if self.state == 1:
             if btn == 0:
@@ -167,6 +169,8 @@ class StopWatch(Screen):
                 self.end_flag = True
                 self.state = 2
                 self.lock.release()
+                self.thread.join()
+                self.thread = None
                 return
             # do tick
             num = len(self.ticks)
@@ -179,7 +183,8 @@ class StopWatch(Screen):
         if btn == 0:
             # do start
             self.state = 1
-            Thread(target=self.target).start()
+            self.thread = Thread(target=self.target)
+            self.thread.start()
             return
         # do close
         self.state = 0
@@ -204,7 +209,6 @@ class StopWatch(Screen):
         self.lock.release()
 
     def on_mouse(self, y, x):
-        # it is tightly coupled with get_btn_pos
         my = self.get_time_y() + 2
         rg = max(min(self.maxx, self.maxy) // 30, 2)
         if abs(y - my) > rg:
@@ -221,3 +225,5 @@ class StopWatch(Screen):
             return
         if abs(x - rx) <= rg:
             self.switch(1)
+
+export = StopWatch
