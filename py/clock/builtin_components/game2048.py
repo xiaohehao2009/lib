@@ -1,25 +1,50 @@
 from base import Screen
+from random import randrange, random
 import curses
 
+
+# constants
 LEFT = 0
 RIGHT = 1
 UP = 2
 DOWN = 3
-DELAY_MOVED = 25
-
+DELAY_MOVED = 0 # no refresh in time when it is 0
+BORD_CH = '#' # don't use chars that uses two letters' space
+S = 6 # size
+W = 6 # a small block width (gte 2)
+H = 4 # a small block height (gte 4)
+def GET_RAND():
+    return 2 if random() < 0.9 else 4
+win_msg = 'You win!'
+lose_msg = 'You lose!'
+end_msg = 'Game over!'
+# ↑ game over after win or the number is too big
+# ↑3 don't be longer than the window
+win_cond = 2048
 keyboard_map = {
     ord('f'): LEFT, ord('F'): LEFT, curses.KEY_LEFT: LEFT,
     ord('h'): RIGHT, ord('H'): RIGHT, curses.KEY_RIGHT: RIGHT,
     ord('g'): UP, ord('G'): UP, curses.KEY_UP: UP,
     ord('v'): DOWN, ord('V'): DOWN, curses.KEY_DOWN: DOWN
 }
+# controls the key binding
+# don't use qwe...iop 1234567890 and SHIFT the above
+
+
+# process the constants
+msg_map = {
+    1: win_msg,
+    2: lose_msg,
+    4: end_msg
+}
+
 
 class Game2048(Screen):
     name = '2048'
     used_pairs = (
-        (curses.COLOR_RED, curses.COLOR_WHITE),
-        (curses.COLOR_GREEN, -1),
-        (curses.COLOR_RED, curses.COLOR_GREEN)
+        (curses.COLOR_RED, curses.COLOR_WHITE), # border style
+        (curses.COLOR_GREEN, -1), # number style
+        (curses.COLOR_RED, curses.COLOR_GREEN) # message style
     )
     styles = None
 
@@ -32,13 +57,13 @@ class Game2048(Screen):
     # 1: win
     # 2: lose
     # 3: after-won
-    # 4: lost after-won
+    # 4: game over after-won or the number is too big
     def __init__(self, scr):
         Screen.__init__(self, scr)
         self.alloc()
         self.restart()
     def alloc(self):
-        # width: 25 height: 17
+        # width: 25 height: 17 (when S 4 W 6 H 4 BORD_CH #)
         # #########################
         # #     #     #     #     #
         # #     #     #     #     #
@@ -57,97 +82,89 @@ class Game2048(Screen):
         # #     #     #     #     #
         # #########################
         if self.can_play():
-            start_x = (self.maxx - 25) // 2
-            start_y = (self.maxy - 16) // 2
-            self.subwin = self.scr.derwin(17, 25, start_y, start_x)
+            start_x = (self.maxx - W * S - 1) // 2
+            # to avoid it overlays the score
+            start_y = (self.maxy - H * S) // 2
+            self.subwin = self.scr.derwin(H * S + 1, W * S + 1, \
+                start_y, start_x)
         else:
             self.subwin = None
     def can_play(self):
-        return self.maxy >= 18 and self.maxx >= 25
+        return self.maxy >= H * S + 2 and self.maxx >= W * S + 1
     def restart(self):
         self.clear()
         self.gen_rand()
         self.score = 0
     def get_pad(self):
-        pad = curses.newpad(17, 25)
+        pad = curses.newpad(H * S + 1, W * S + 1)
         style = Game2048.styles[0]
-        for y in range(0, 17):
-            if y % 4 == 0:
+        for y in range(0, H * S + 1):
+            if y % H == 0: # a small block height is H
                 self.scr.refresh()
-                pad.addstr(y, 0, '#' * 24, style)
+                # a small block width is W
+                pad.addstr(y, 0, BORD_CH * (W * S), style)
                 # to avoid write to the right-bottom corner
-                pad.insch(y, 24, '#', style)
+                pad.insch(y, W * S, BORD_CH, style)
                 continue
-            for x in range(0, 25, 6):
+            for x in range(0, W * S + 1, W):
                 pad.addch(y, x, '#', style)
         return pad
-    def draw_num(self, j, msg, y):
+    def draw_num(self, j, msg, y0):
         leng = len(msg)
-        if leng < 6:
-            x = 6 * j + 3 - leng // 2
-            self.subwin.addstr(y, x, msg, Game2048.styles[1])
-            return
-        if leng < 11:
-            len1 = leng // 2
-            msg1 = msg[:len1]
-            msg2 = msg[len1:]
-            self.draw_num(j, msg1, y - 1)
-            self.draw_num(j, msg2, y)
-            return
-        len1 = leng // 3
-        msg1 = msg[:len1]
-        msg2 = msg[len1:]
-        self.draw_num(j, msg1, y - 1)
-        self.draw_num(j, msg2, y + 1)
+        strs = []
+        for i in range(0, leng, W - 1):
+            strs.append(msg[i:i + W - 1])
+        lengt = len(strs)
+        mid = lengt // 2
+        for i, seg in enumerate(strs):
+            x = (W + 2 - len(seg)) // 2 + W * j
+            y = y0 + i - mid
+            self.subwin.addstr(y, x, seg, Game2048.styles[1])
     def draw(self):
         if not self.can_play():
             return
+        self.scr.move(0, 0)
+        self.scr.clrtoeol()
         self.scr.addstr(0, 0, f'Score: {self.score} Max: {self.max}')
         self.subwin.erase()
         if self.pad is None:
             self.pad = self.get_pad()
-        self.pad.overwrite(self.subwin, 0, 0, 0, 0, 16, 24)
+        self.pad.overwrite(self.subwin, 0, 0, 0, 0, H * S, W * S)
         for i, row in enumerate(self.grid):
-            y = 4 * i + 2
+            y = H * i + (H + 1) // 2
+            # the mid y in the white space of the block
             for j, item in enumerate(row):
                 if item is None:
                     continue
                 self.draw_num(j, str(item), y)
-        if self.state == 1:
-            msg = 'You win!'
-            x = (25 - len(msg)) // 2
-            self.subwin.addstr(8, x, msg, Game2048.styles[2])
-        elif self.state == 2:
-            msg = 'You lose!'
-            x = (25 - len(msg)) // 2
-            self.subwin.addstr(8, x, msg, Game2048.styles[2])
-        elif self.state == 4:
-            msg = 'Game over!'
-            x = (25 - len(msg)) // 2
-            self.subwin.addstr(8, x, msg, Game2048.styles[2])
+        if self.state in { 1, 2, 4 }:
+            msg = msg_map[self.state]
+            x = (W * S + 1 - len(msg)) // 2
+            self.subwin.addstr(2 * S, x, msg, Game2048.styles[2])
         self.subwin.noutrefresh()
         self.scr.noutrefresh()
         curses.doupdate()
+        # to optimize
     def isfull(self):
-        for y in range(4):
-            for x in range(4):
+        for y in range(S):
+            for x in range(S):
                 if self.grid[y][x] is None:
                     return False
         return True
     def clear(self):
-        self.grid = [[None, None, None, None] for i in range(4)]
+        self.grid = [[None for j in range(S)] for i in range(S)]
     def gen_rand(self):
         from random import randrange, random
         while True:
-            y, x = randrange(0, 4), randrange(0, 4)
+            y, x = randrange(0, S), randrange(0, S)
             if self.grid[y][x] is None:
-                self.grid[y][x] = 2 if random() < 0.9 else 4
+                self.grid[y][x] = GET_RAND()
                 break
     def islose(self):
         if not self.isfull():
             return False
-        for y in range(4):
-            for x in range(3):
+        for y in range(S):
+            for x in range(S - 1):
                 if self.grid[y][x] == self.grid[y][x + 1] or \
                     self.grid[x][y] == self.grid[x + 1][y]:
                     return False
@@ -155,7 +172,15 @@ class Game2048(Screen):
     def iswin(self):
         for row in self.grid:
             for item in row:
-                if item is not None and item >= 2048:
+                if item is not None and item >= win_cond:
+                    return True
+        return False
+    def issup(self):
+        # if number is too big too show
+        base_num = 10 ** ((W - 1) * (H - 1))
+        for row in self.grid:
+            for item in row:
+                if item is not None and item >= base_num:
                     return True
         return False
     def move(self, direction):
@@ -163,49 +188,53 @@ class Game2048(Screen):
             return
         flag = False
         if direction == LEFT:
-            for y in range(4):
-                for x in range(1, 4):
+            for y in range(S):
+                for x in range(1, S):
                     if self.move_one(y, x, direction):
                         if not flag:
                             flag = True
-                        self.draw()
                         if DELAY_MOVED > 0:
+                            self.draw()
                             curses.napms(DELAY_MOVED)
         elif direction == RIGHT:
-            for y in range(4):
-                for x in range(3, -1, -1):
+            for y in range(S):
+                for x in range(S - 1, -1, -1):
                     if self.move_one(y, x, direction):
                         if not flag:
                             flag = True
-                        self.draw()
                         if DELAY_MOVED > 0:
+                            self.draw()
                             curses.napms(DELAY_MOVED)
         elif direction == UP:
-            for x in range(4):
-                for y in range(1, 4):
+            for x in range(S):
+                for y in range(1, S):
                     if self.move_one(y, x, direction):
                         if not flag:
                             flag = True
-                        self.draw()
                         if DELAY_MOVED > 0:
+                            self.draw()
                             curses.napms(DELAY_MOVED)
         elif direction == DOWN:
-            for x in range(4):
-                for y in range(3, -1, -1):
+            for x in range(S):
+                for y in range(S - 1, -1, -1):
                     if self.move_one(y, x, direction):
                         if not flag:
                             flag = True
-                        self.draw()
                         if DELAY_MOVED > 0:
+                            self.draw()
                             curses.napms(DELAY_MOVED)
         if not flag:
             return
         self.gen_rand()
+        if self.issup():
+            self.state = 4
+            self.draw()
+            return
         if self.islose():
             self.state = 2 if self.state == 0 else 4
-            self.draw()
         elif self.state == 0 and self.iswin():
             self.state = 1
+        self.draw()
     def move_one(self, y0, x0, direction):
         if self.grid[y0][x0] is None:
             return False
@@ -239,14 +268,14 @@ class Game2048(Screen):
             row = self.grid[y0]
             val0 = row[x0]
             pos = x0
-            for x in range(x0 + 1, 4):
+            for x in range(x0 + 1, S):
                 if row[x] is None:
                     pos = x
                 else:
                     break
             # if pos == x0:
                 # return
-            if pos == 3:
+            if pos == S - 1:
                 if pos == x0:
                     return False
                 row[x0] = None
@@ -289,14 +318,14 @@ class Game2048(Screen):
         elif direction == DOWN:
             val0 = self.grid[y0][x0]
             pos = y0
-            for y in range(y0 + 1, 4):
+            for y in range(y0 + 1, S):
                 if self.grid[y][x0] is None:
                     pos = y
                 else:
                     break
             # if pos == y0:
                 # return
-            if pos == 3:
+            if pos == S - 1:
                 if pos == y0:
                     return False
                 self.grid[y0][x0] = None
