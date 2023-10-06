@@ -38,7 +38,7 @@ const vm = code => {
         // console.log({loc, arg, ev});
         // console.log([i,ev]);
         if (call[j][i] === CALL) {
-            if (typeof call[j][i]==='number')
+            if (typeof call[j][i+1]==='number')
             funs[call[j][i+1]](),i+=2;
             else
             call[j].push(i+2),call[j+1]=code[call[j][i+1]],j++,
