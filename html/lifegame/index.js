@@ -1,4 +1,3 @@
-try{
 (() => {
     const width = 300;
     const height = 300;
@@ -64,7 +63,6 @@ try{
         const ny = Math.floor(y / squarePx);
         gr.invert(nx, ny);
         this.done();
-        gr.markAround(nx, ny);
         gr.mark[ny * width + nx] = 1;
     };
     function Grid(co) {
@@ -272,4 +270,3 @@ try{
         co.processClick(gr, x, y);
     });
 })();
-}catch(ex){alert(ex)}
