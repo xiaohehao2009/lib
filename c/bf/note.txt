@@ -1,0 +1,11 @@
+compile command: g++ -Wall -Wextra -O3 main.cpp -o main
+
+bench: mandel.b on MI6X
+mandel.cpp - 1.46s
+main.cpp (-Ofast) - 11.54s
+main.cpp (-O3) - 11.55s
+main.cpp (-O1) - 11.68s
+main.cpp (-O2) - 11.71s
+previous (code/c/bf/main.c) (-Ou) - 12.88s
+open-source implemention (https://github.com/fabianishere/brainfuck, 2.7.3) - 22.51s
+main.cpp (-O0) - 32.45s
