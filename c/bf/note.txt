@@ -9,3 +9,7 @@ main.cpp (-O2) - 11.71s
 previous (code/c/bf/main.c) (-Ou) - 12.88s
 open-source implemention (https://github.com/fabianishere/brainfuck, 2.7.3) - 22.51s
 main.cpp (-O0) - 32.45s
+
+update:
+main_.cpp (-O3) - 13.39s on average
+main.cpp (-O3) - 13.53s on average

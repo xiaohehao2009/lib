@@ -1,4 +1,5 @@
 #include<cstdio>
+#include<cmath>
 #define CASE break;case
 const int N=1<<20,M=1<<15;
 char s[N],m[M];
@@ -25,10 +26,10 @@ int main(int argc,char **argv){
 	for(int i=0;i<len;i++){
 		switch(s[i]){
 		case '+':
-			if(cnt&&a[cnt-1].t==0)a[cnt-1].d++;
+			if(cnt&&(a[cnt-1].t==0||a[cnt-1].t==4))a[cnt-1].d++;
 			else a[cnt++]={0,1};
 		CASE '-':
-			if(cnt&&a[cnt-1].t==0)a[cnt-1].d--;
+			if(cnt&&(a[cnt-1].t==0||a[cnt-1].t==4))a[cnt-1].d--;
 			else a[cnt++]={0,-1};
 		CASE '>':
 			if(cnt&&a[cnt-1].t==1)a[cnt-1].d++;
@@ -44,12 +45,19 @@ int main(int argc,char **argv){
 				printf("NO MATCHING LEFT BRACKET: FOR CHAR AT %d\n",i+1);
 				return 1;
 			}
-			a[sta[--tot]].d=cnt+1;
-			a[cnt++]={3,sta[tot]+1};
+			if(cnt>1&&a[cnt-2].t==2&&a[cnt-1].t==0&&abs(a[cnt-1].d)==1){
+				a[cnt-2]={4,0};
+				cnt--;
+				tot--;
+			}
+			else{
+				a[sta[--tot]].d=cnt+1;
+				a[cnt++]={3,sta[tot]+1};
+			}
 		CASE '.':
-			a[cnt++]={4,0};
-		CASE ',':
 			a[cnt++]={5,0};
+		CASE ',':
+			a[cnt++]={6,0};
 		}
 	}
 	if(tot){
@@ -76,9 +84,11 @@ int main(int argc,char **argv){
 			if(m[ptr])i=a[i].d;
 			else i++;
 		CASE 4:
+			m[ptr]=a[i++].d;
+		CASE 5:
 			fwrite(m+ptr,1,1,stdout);
 			i++;
-		CASE 5:
+		CASE 6:
 			fread(m+ptr,1,1,stdin);
 			i++;
 			break;
