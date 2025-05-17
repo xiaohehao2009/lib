@@ -1,0 +1,8 @@
+displayName: "Sharp Drone"
+name: "sharp-drone"
+author: "xiaohehao2009"
+main: "sharpdrone.SharpDroneMod"
+description: "Remove drone's damage ratio to buildings and improve drone's damage. 移除无人机对建筑的伤害倍率，提高无人机的伤害。"
+version: 1.0
+minGameVersion: 145
+java: true

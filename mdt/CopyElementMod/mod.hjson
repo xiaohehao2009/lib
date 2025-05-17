@@ -1,0 +1,8 @@
+displayName: "Copy Element"
+name: "copy-element"
+author: "xiaohehao2009"
+main: "copyelement.CopyElementMod"
+description: "Added an block which copies items. 加入了一种复制物品的方块。"
+version: 1.0
+minGameVersion: 145
+java: true

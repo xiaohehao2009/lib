@@ -1,0 +1,7 @@
+set i 0
+jump 3 lessThan i 16
+stop
+ubind @mono
+ucontrol flag i 0 0 0 0
+ucontrol unbind 0 0 0 0 0
+jump 1 always x false

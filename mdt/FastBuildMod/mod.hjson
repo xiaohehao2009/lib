@@ -1,0 +1,8 @@
+displayName: "Fast Build"
+name: "fast-build"
+author: "xiaohehao2009"
+main: "fastbuild.FastBuildMod"
+description: "Increase drone's construction speed to ten times. 将无人机的建造速度提至十倍。"
+version: 1.0
+minGameVersion: 145
+java: true
