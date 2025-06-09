@@ -1,0 +1,8 @@
+displayName: "Super Cheat"
+name: "super-cheat"
+author: "xiaohehao2009"
+main: "supercheat.SuperCheatMod"
+description: "Provide powerful cheating function.提供强大的作弊功能。"
+version: 1.0
+minGameVersion: 145
+java: true
