@@ -3,31 +3,31 @@ from prompt_toolkit import prompt
 from prompt_toolkit.completion import PathCompleter
 from prompt_toolkit.validation import Validator
 
-def add_lyric(music_file, lyric_file, encoding):
-    print('deal music:', music_file, 'lyric:', lyric_file)
-    music = ID3(music_file)
-    with open(lyric_file) as file:
-        lyric = file.read().strip('\n\r')
-    music.setall('USLT', [USLT(format=1, type=2, text=lyric, encoding=encoding)])
-    music.save()
+
+def add_lyric(music_path, lyric_path, encoding):
+    print('Task:')
+    print('\x1b[31mmusic_path\x1b[m : \x1b[32m', music_path, '\x1b[m', sep='')
+    print('\x1b[31mlyric_path\x1b[m : \x1b[32m', lyric_path, '\x1b[m', sep='')
+    music_file = ID3(music_path)
+    with open(lyric_path) as lyric_file:
+        lyric_text = lyric_file.read().strip('\n\r')
+    tag = USLT(text=lyric_text, encoding=encoding)
+    music_file.setall('USLT', [tag])
+    music_file.save()
+
 
 def main():
-    com = PathCompleter()
-    val = Validator.from_callable(lambda x: x.lower() in ('y', 'yes', 'n', 'no', 'q', 'quit'))
-    mus = prompt('音乐/quit > ', completer=com)
-    if mus.lower() in ('quit', 'q'):
-        return
-    lyr = prompt('歌词/quit > ', completer=com)
-    if lyr.lower() in ('quit', 'q'):
-        return
-    uni = prompt('Unicode (y/n/quit) > ', validator=val)
-    if uni.lower() in ('quit', 'q'):
-        return
-    if uni.lower() in ('y', 'yes'):
-        enc = Encoding.UTF8
+    completer = PathCompleter()
+    validator = Validator.from_callable(lambda x: x.lower() in ('y', 'yes', 'n', 'no', ''))
+    music_path = prompt('音乐 > ', completer=completer)
+    lyric_path = prompt('歌词 > ', completer=completer)
+    utf16 = prompt('UTF16 (y)/n > ', validator=validator)
+    if utf16.lower() in ('n', 'no'):
+        encoding = Encoding.UTF8
     else:
-        enc = Encoding.UTF16
-    add_lyric(mus, lyr, enc)
+        encoding = Encoding.UTF16
+    add_lyric(music_path, lyric_path, encoding)
+
 
 if __name__ == '__main__':
     main()
